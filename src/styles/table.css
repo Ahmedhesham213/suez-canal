@@ -1,0 +1,133 @@
+.travels-page-container {
+    background-image: url('/images/canal-6799169.jpg'); 
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    color: #000000;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 120px 20px 80px;
+    width: 100%;
+}
+
+.travels-card-container {
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.85); 
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 900px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.travels-card-container h1 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: #1743e3;
+    font-weight: 700;
+}
+
+#crudForm {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+#crudForm input {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    width: 100%;
+}
+
+#crudForm input:focus {
+    border-color: #1743e3;
+    outline: none;
+}
+
+#crudForm button {
+    background-color: #1743e3;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+    border: none;
+    padding: 12px;
+    font-size: 1.1rem;
+}
+
+#crudForm button:hover {
+    background-color: #1130a3;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+#dataTable {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 600px;
+}
+
+#dataTable th, #dataTable td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+#dataTable th {
+    background-color: #f8f9fa;
+    color: #333;
+    font-weight: 600;
+}
+
+#dataTable tbody tr:hover {
+    background-color: #fafafa;
+}
+
+.action-buttons button {
+    padding: 6px 12px;
+    margin: 3px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.action-buttons .edit {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.action-buttons .delete {
+    background-color: #f44336;
+    color: white;
+}
+
+.action-buttons button:hover {
+    opacity: 0.9;
+}
+
+.user-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+}
