@@ -1,150 +1,99 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../styles/login.css';
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+
+/* Uses original css/login.css - exact markup as login.html
+   login.js toggle logic ported to useEffect */
 
 export default function Login() {
-  const [isRegisterActive, setIsRegisterActive] = useState(false);
-  const [loginUsername, setLoginUsername] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [registerEmail, setRegisterEmail] = useState('');
-  const [registerUsername, setRegisterUsername] = useState('');
-  const [registerPassword, setRegisterPassword] = useState('');
+  useEffect(() => {
+    const container = document.querySelector('.container');
+    const registerBtn = document.querySelector('.register-btn');
+    const loginBtn = document.querySelector('.login-btn');
 
-  const navigate = useNavigate();
+    if (!container || !registerBtn || !loginBtn) return;
 
-  const handleLoginSubmit = (e) => {
-    e.preventDefault();
-    if (!loginUsername || !loginPassword) {
-      alert('Please fill out all login fields.');
-      return;
-    }
-    alert(`Welcome back, ${loginUsername}! You have successfully logged in.`);
-    // Navigate back to the home page
-    navigate('/');
-  };
+    const onRegister = () => container.classList.add('active');
+    const onLogin = () => container.classList.remove('active');
 
-  const handleRegisterSubmit = (e) => {
-    e.preventDefault();
-    if (!registerEmail || !registerUsername || !registerPassword) {
-      alert('Please fill out all registration fields.');
-      return;
-    }
-    alert(`Account created successfully for ${registerUsername}! Please login.`);
-    setIsRegisterActive(false); // Switch back to login form
-    // Clear registration fields
-    setRegisterEmail('');
-    setRegisterUsername('');
-    setRegisterPassword('');
-  };
+    registerBtn.addEventListener('click', onRegister);
+    loginBtn.addEventListener('click', onLogin);
+
+    return () => {
+      registerBtn.removeEventListener('click', onRegister);
+      loginBtn.removeEventListener('click', onLogin);
+    };
+  }, []);
 
   return (
-    <div className="login-page-container">
-      <div className={`login-card-container ${isRegisterActive ? 'active' : ''}`}>
-        
-        {/* LOGIN FORM BOX */}
+    <>
+      <link rel="stylesheet" href="/css/login.css" />
+
+      {/* exact same markup as login.html body */}
+      <div className="container active">
         <div className="form-box login">
-          <form onSubmit={handleLoginSubmit}>
+          <form action="php/login.php" method="post">
             <h1>Login</h1>
             <div className="input-box">
-              <input
-                type="text"
-                placeholder="Username"
-                value={loginUsername}
-                onChange={(e) => setLoginUsername(e.target.value)}
-                required
-              />
+              <input type="text" placeholder="Username" name="username" required />
               <i className="bx bxs-user"></i>
             </div>
             <div className="input-box">
-              <input
-                type="password"
-                placeholder="Password"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                required
-              />
+              <input type="password" name="password" placeholder="Password" required />
               <i className="bx bxs-lock-alt"></i>
             </div>
             <div className="forgot-link">
-              <a href="#" onClick={(e) => { e.preventDefault(); alert('Password recovery link sent if email matches database.'); }}>
-                Forgot password?
-              </a>
+              <a href="#">Forgot password?</a>
             </div>
             <button type="submit" className="btn">Login</button>
             <p>or login with social platforms</p>
             <div className="social-icons">
-              <a href="#" onClick={(e) => { e.preventDefault(); alert('Google Auth triggered'); }}><i className="bx bxl-google"></i></a>
-              <a href="#" onClick={(e) => { e.preventDefault(); alert('Facebook Auth triggered'); }}><i className="bx bxl-facebook"></i></a>
-              <a href="#" onClick={(e) => { e.preventDefault(); alert('Github Auth triggered'); }}><i className="bx bxl-github"></i></a>
-              <a href="#" onClick={(e) => { e.preventDefault(); alert('LinkedIn Auth triggered'); }}><i className="bx bxl-linkedin"></i></a>
+              <a href="#"><i className="bx bxl-google"></i></a>
+              <a href="#"><i className="bx bxl-facebook"></i></a>
+              <a href="#"><i className="bx bxl-github"></i></a>
+              <a href="#"><i className="bx bxl-linkedin"></i></a>
             </div>
           </form>
         </div>
 
-        {/* REGISTRATION FORM BOX */}
         <div className="form-box register">
-          <form onSubmit={handleRegisterSubmit}>
+          <form action="php/register.php" method="POST">
             <h1>Registration</h1>
             <div className="input-box">
-              <input
-                type="email"
-                placeholder="Email"
-                value={registerEmail}
-                onChange={(e) => setRegisterEmail(e.target.value)}
-                required
-              />
+              <input type="text" placeholder="Email" name="email" id="email" required />
               <i className="bx bxs-envelope"></i>
             </div>
             <div className="input-box">
-              <input
-                type="text"
-                placeholder="Username"
-                value={registerUsername}
-                onChange={(e) => setRegisterUsername(e.target.value)}
-                required
-              />
+              <input type="text" placeholder="Username" name="username" id="username" required />
               <i className="bx bxs-user"></i>
             </div>
             <div className="input-box">
-              <input
-                type="password"
-                placeholder="Password"
-                value={registerPassword}
-                onChange={(e) => setRegisterPassword(e.target.value)}
-                required
-              />
+              <input type="password" placeholder="Password" name="password" id="password" required />
               <i className="bx bxs-lock-alt"></i>
             </div>
             <button type="submit" className="btn">Register</button>
             <p>or Register with social platforms</p>
             <div className="social-icons">
-              <a href="#" onClick={(e) => { e.preventDefault(); alert('Google Sign-Up triggered'); }}><i className="bx bxl-google"></i></a>
-              <a href="#" onClick={(e) => { e.preventDefault(); alert('Facebook Sign-Up triggered'); }}><i className="bx bxl-facebook"></i></a>
-              <a href="#" onClick={(e) => { e.preventDefault(); alert('Github Sign-Up triggered'); }}><i className="bx bxl-github"></i></a>
-              <a href="#" onClick={(e) => { e.preventDefault(); alert('LinkedIn Sign-Up triggered'); }}><i className="bx bxl-linkedin"></i></a>
+              <a href="#"><i className="bx bxl-google"></i></a>
+              <a href="#"><i className="bx bxl-facebook"></i></a>
+              <a href="#"><i className="bx bxl-github"></i></a>
+              <a href="#"><i className="bx bxl-linkedin"></i></a>
             </div>
           </form>
         </div>
 
-        {/* TOGGLE PANELS */}
         <div className="toggle-box">
           <div className="toggle-panel toggle-left">
             <h1>Hello, Welcome!</h1>
             <p>Don't have an account?</p>
-            <button className="btn register-btn" onClick={() => setIsRegisterActive(true)}>
-              Register
-            </button>
+            <button className="btn register-btn">Register</button>
           </div>
           <div className="toggle-panel toggle-right">
             <h1>Welcome Back!</h1>
             <p>Already have an account?</p>
-            <button className="btn login-btn" onClick={() => setIsRegisterActive(false)}>
-              Login
-            </button>
+            <button className="btn login-btn">Login</button>
           </div>
         </div>
-
       </div>
-    </div>
+    </>
   );
 }

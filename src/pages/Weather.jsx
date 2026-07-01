@@ -1,234 +1,242 @@
-import React, { useState, useEffect } from 'react';
-import '../styles/weather.css';
+import React, { useEffect } from 'react';
+import { NavLink, Link } from 'react-router-dom';
+
+/* Uses original css/weather.css + css/header.css - exact markup as weather.html
+   The original weather.js logic is ported into useEffect */
 
 const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 const SUEZ_LAT = 30.5852;
 const SUEZ_LON = 32.2739;
 
+function getWeatherDescription(code) {
+  const descriptions = {
+    0: "Clear Sky", 1: "Mainly Clear", 2: "Partly Cloudy", 3: "Overcast",
+    45: "Fog", 48: "Depositing Rime Fog", 51: "Drizzle: Light",
+    61: "Rain: Slight", 63: "Rain: Moderate", 65: "Rain: Heavy",
+    71: "Snow: Slight", 73: "Snow: Moderate", 75: "Snow: Heavy",
+    95: "Thunderstorm", 99: "Thunderstorm with Hail",
+  };
+  return descriptions[code] || "Unknown Weather";
+}
+
+function getWeatherIcon(code) {
+  const icons = {
+    0: "sunny-icon.svg", 1: "clear-icon.svg", 2: "partly-cloudy-icon.svg",
+    3: "cloudy-icon.svg", 45: "foggy-icon.svg", 48: "foggy-icon.svg",
+    51: "drizzle-icon.svg", 61: "rainy-icon.svg", 63: "rainy-icon.svg",
+    65: "rainy-icon.svg", 71: "rainy-icon.svg", 73: "rainy-icon.svg",
+    75: "rainy-icon.svg", 95: "thunderstorm-icon.svg", 99: "hailstorm-icon.svg",
+  };
+  return icons[code] || "unknown-icon.svg";
+}
+
+function getWindDirection(degree) {
+  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const index = Math.round((degree % 360) / 45) % 8;
+  return directions[index];
+}
+
+function formatDate(date) {
+  const options = { weekday: "long", hour: "2-digit", minute: "2-digit" };
+  return date.toLocaleString("en-US", options);
+}
+
+function getWeekday(date) {
+  const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  return weekdays[date.getDay()];
+}
+
 export default function Weather() {
-  const [weatherData, setWeatherData] = useState(null);
-  const [activeTab, setActiveTab] = useState('week'); // 'today' or 'week'
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function getWeatherData() {
+    async function fetchWeatherData() {
       try {
-        setLoading(true);
-        // Fetch weather data, including daily metrics, uv, sunrise/sunset, humidity, and visibility
         const response = await fetch(
-          `${BASE_URL}?latitude=${SUEZ_LAT}&longitude=${SUEZ_LON}&current=relative_humidity_2m,visibility&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset,uv_index_max&current_weather=true&timezone=auto`
+          `${BASE_URL}?latitude=${SUEZ_LAT}&longitude=${SUEZ_LON}&daily=temperature_2m_max,temperature_2m_min,weathercode&current_weather=true&timezone=auto`
         );
         const data = await response.json();
-        setWeatherData(data);
+        updateCurrentWeather(data.current_weather);
+        updateWeeklyForecast(data.daily);
+        updateHighlights(data.current_weather);
       } catch (error) {
         console.error("Error fetching weather data:", error);
-      } finally {
-        setLoading(false);
       }
     }
-    getWeatherData();
+
+    function updateCurrentWeather(current) {
+      const tempEl = document.getElementById("current-temp");
+      if (tempEl) tempEl.textContent = `${Math.round(current.temperature)}°C`;
+      const dayEl = document.querySelector(".current-day");
+      if (dayEl) dayEl.textContent = formatDate(new Date());
+      const descEl = document.querySelector(".weather-desc");
+      if (descEl) descEl.textContent = getWeatherDescription(current.weathercode);
+      const rainEl = document.querySelector(".rain-chance");
+      if (rainEl) rainEl.textContent = `Rain - ${current.precipitation_probability || 0}%`;
+    }
+
+    function updateWeeklyForecast(daily) {
+      const forecastContainer = document.getElementById("forecast-container");
+      if (!forecastContainer) return;
+      forecastContainer.innerHTML = "";
+
+      daily.time.forEach((dateString, index) => {
+        const date = new Date(dateString);
+        const weekday = getWeekday(date);
+        const maxTemp = Math.round(daily.temperature_2m_max[index]);
+        const minTemp = Math.round(daily.temperature_2m_min[index]);
+        const weatherCode = daily.weathercode[index];
+        const weatherIcon = getWeatherIcon(weatherCode);
+
+        forecastContainer.innerHTML += `
+          <div class="forecast-day" data-day="${index}">
+            <p class="day">${weekday}</p>
+            <img src="/images/weather/${weatherIcon}" alt="${getWeatherDescription(weatherCode)}">
+            <p class="temp">${maxTemp}° - ${minTemp}°</p>
+          </div>
+        `;
+      });
+    }
+
+    function updateHighlights(current) {
+      const uvVal = document.querySelector('.uv-value');
+      if (uvVal) uvVal.textContent = '5';
+      const uvData = document.querySelector('.uv-data p');
+      if (uvData) uvData.textContent = 'Normal';
+
+      const windVal = document.querySelector('.wind-value');
+      if (windVal) windVal.textContent = `${current.windspeed.toFixed(1)} km/h`;
+      const windDir = document.querySelector('.wind-dir');
+      if (windDir) windDir.textContent = getWindDirection(current.winddirection);
+
+      const card3Values = document.querySelectorAll('.highlight-cards .card:nth-child(3) .value');
+      if (card3Values[0]) card3Values[0].textContent = '6:00 AM';
+      if (card3Values[1]) card3Values[1].textContent = '6:00 PM';
+    }
+
+    fetchWeatherData();
   }, []);
 
-  const getWeatherDescription = (code) => {
-    const descriptions = {
-      0: "Clear Sky",
-      1: "Mainly Clear",
-      2: "Partly Cloudy",
-      3: "Overcast",
-      45: "Fog",
-      48: "Depositing Rime Fog",
-      51: "Drizzle: Light",
-      61: "Rain: Slight",
-      63: "Rain: Moderate",
-      65: "Rain: Heavy",
-      71: "Snow: Slight",
-      73: "Snow: Moderate",
-      75: "Snow: Heavy",
-      95: "Thunderstorm",
-      99: "Thunderstorm with Hail",
-    };
-    return descriptions[code] || "Unknown Weather";
-  };
-
-  const getWeatherIcon = (code) => {
-    const icons = {
-      0: "sunny-icon.svg",
-      1: "clear-icon.svg",
-      2: "partly-cloudy-icon.svg",
-      3: "cloudy-icon.svg",
-      45: "foggy-icon.svg",
-      48: "foggy-icon.svg",
-      51: "drizzle-icon.svg",
-      61: "rainy-icon.svg",
-      63: "rainy-icon.svg",
-      65: "rainy-icon.svg",
-      71: "rainy-icon.svg",
-      73: "rainy-icon.svg",
-      75: "rainy-icon.svg",
-      95: "thunderstorm-icon.svg",
-      99: "hailstorm-icon.svg",
-    };
-    return icons[code] || "clear-icon.svg";
-  };
-
-  const getWindDirection = (degree) => {
-    const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-    const index = Math.round((degree % 360) / 45) % 8;
-    return directions[index];
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const options = { weekday: "long", hour: "2-digit", minute: "2-digit" };
-    return date.toLocaleString("en-US", options);
-  };
-
-  const getWeekday = (dateString) => {
-    const date = new Date(dateString);
-    const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    return weekdays[date.getDay()];
-  };
-
-  const formatTime = (timeStr) => {
-    if (!timeStr) return '--:--';
-    const date = new Date(timeStr);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-  if (loading) {
-    return (
-      <div className="weather-page-container">
-        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1743e3', margin: 'auto' }}>
-          Loading Weather Dashboard...
-        </div>
-      </div>
-    );
-  }
-
-  if (!weatherData) {
-    return (
-      <div className="weather-page-container">
-        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#f44336', margin: 'auto' }}>
-          Failed to load weather data. Please try again later.
-        </div>
-      </div>
-    );
-  }
-
-  const { current_weather, daily, current } = weatherData;
-  const currentTemp = Math.round(current_weather.temperature);
-  const currentDesc = getWeatherDescription(current_weather.weathercode);
-  const currentIcon = getWeatherIcon(current_weather.weathercode);
-  const currentWindSpeed = current_weather.windspeed;
-  const currentWindDir = getWindDirection(current_weather.winddirection);
-  
-  // Extracting from daily arrays
-  const uvIndexToday = daily.uv_index_max ? daily.uv_index_max[0] : 5;
-  const sunriseToday = daily.sunrise ? formatTime(daily.sunrise[0]) : '6:00 AM';
-  const sunsetToday = daily.sunset ? formatTime(daily.sunset[0]) : '6:00 PM';
-  const humidityToday = current.relative_humidity_2m ?? '65';
-  const visibilityToday = current.visibility ? (current.visibility / 1000).toFixed(1) : '10.0';
-
   return (
-    <div className="weather-page-container">
+    <>
+      <link rel="stylesheet" href="/css/weather.css" />
+      <link rel="stylesheet" href="/css/header.css" />
+
+      {/* header */}
+      <header className="header">
+        <Link to="/" className="logo">
+          <img src="/images/keep it2.png" alt="logo" width="150" className="logo-image" />
+        </Link>
+
+        <nav className="navbar">
+          <NavLink to="/" end style={{ '--i': 1 }} className={({ isActive }) => isActive ? 'active' : ''}>Home</NavLink>
+          <NavLink to="/about" style={{ '--i': 2 }} className={({ isActive }) => isActive ? 'active' : ''}>About</NavLink>
+          <NavLink to="/travels" style={{ '--i': 3 }} className={({ isActive }) => isActive ? 'active' : ''}>Today Travels</NavLink>
+          <NavLink to="/weather" style={{ '--i': 4 }} className={({ isActive }) => isActive ? 'active' : ''}>Weather</NavLink>
+          <Link to="/login">
+            <button className="singn_in_btn">sign in</button>
+          </Link>
+        </nav>
+
+        <div className="soial-media">
+          <a href="https://twitter.com/SuezAuthorityEG" target="_blank" rel="noreferrer" style={{ '--i': 1 }}><i className="bx bxl-twitter"></i></a>
+          <a href="https://www.facebook.com/SuezCanalAuthorityEG/" target="_blank" rel="noreferrer" style={{ '--i': 2 }}><i className="bx bxl-facebook-circle"></i></a>
+          <a href="https://www.instagram.com/suezcanalauthority/" target="_blank" rel="noreferrer" style={{ '--i': 3 }}><i className="bx bxl-instagram-alt"></i></a>
+        </div>
+      </header>
+
+      {/* body - exact same as weather.html */}
       <div className="weather-dashboard">
-        
-        {/* Sidebar displaying current weather details */}
+
         <div className="sidebar">
           <div className="current-weather">
             <div className="weather-icon">
-              <img src={`/images/weather/${currentIcon}`} alt={currentDesc} />
+              <img src="/images/weather/sunny-icon.png" alt="Current Weather" />
             </div>
-            <h2>{currentTemp}°C</h2>
-            <p className="current-day">{formatDate(current_weather.time)}</p>
-            <p className="weather-desc">{currentDesc}</p>
-            <p className="rain-chance">Suez Transit Region</p>
+            <h2 id="current-temp">12°C</h2>
+            <p className="current-day">Monday, 16:00</p>
+            <p className="weather-desc">Mostly Cloudy</p>
+            <p className="rain-chance">Rain - 30%</p>
             <div className="location">
-              <img src="/images/weather/background.jpg" alt="Suez Canal Map Location" />
+              <img src="/images/weather/background.jpg" alt="Location" />
               <p>Suez Canal, Suez, Egypt</p>
             </div>
           </div>
         </div>
 
-        {/* Main section showing weekly forecast or today detailed tabs */}
         <div className="main-content">
           <div className="forecast">
             <div className="tabs">
-              <button 
-                className={`tab ${activeTab === 'today' ? 'active' : ''}`} 
-                onClick={() => setActiveTab('today')}
-              >
-                Today
-              </button>
-              <button 
-                className={`tab ${activeTab === 'week' ? 'active' : ''}`} 
-                onClick={() => setActiveTab('week')}
-              >
-                Week
-              </button>
+              <button className="tab" id="today-tab">Today</button>
+              <button className="tab active" id="week-tab">Week</button>
             </div>
-
-            <div className="forecast-days">
-              {activeTab === 'week' ? (
-                daily.time.map((dateStr, index) => {
-                  const maxTemp = Math.round(daily.temperature_2m_max[index]);
-                  const minTemp = Math.round(daily.temperature_2m_min[index]);
-                  const code = daily.weathercode[index];
-                  const icon = getWeatherIcon(code);
-                  const desc = getWeatherDescription(code);
-
-                  return (
-                    <div className="forecast-day" key={index}>
-                      <p className="day">{getWeekday(dateStr)}</p>
-                      <img src={`/images/weather/${icon}`} alt={desc} title={desc} />
-                      <p className="temp">{maxTemp}° - {minTemp}°</p>
-                    </div>
-                  );
-                })
-              ) : (
-                // Displaying expanded info for today
-                <div style={{ padding: '20px', background: '#f8f9fc', borderRadius: '8px', border: '1px solid #e5e5e5', width: '100%', textAlign: 'left' }}>
-                  <h4 style={{ fontSize: '1.2rem', color: '#1743e3', marginBottom: '10px' }}>Today's Weather Conditions</h4>
-                  <p style={{ margin: '5px 0' }}><strong>Condition:</strong> {currentDesc}</p>
-                  <p style={{ margin: '5px 0' }}><strong>Current Temperature:</strong> {currentTemp}°C</p>
-                  <p style={{ margin: '5px 0' }}><strong>Day Range:</strong> {Math.round(daily.temperature_2m_max[0])}°C Max / {Math.round(daily.temperature_2m_min[0])}°C Min</p>
-                  <p style={{ margin: '5px 0' }}><strong>Wind Conditions:</strong> {currentWindSpeed} km/h from {currentWindDir}</p>
-                  <p style={{ margin: '5px 0' }}><strong>Sun Cycle:</strong> Sunrise at {sunriseToday} / Sunset at {sunsetToday}</p>
-                </div>
-              )}
+            <div className="forecast-days" id="forecast-container">
+              <div className="forecast-day" id="forecast-day">
+                <p className="day">Wednesday</p>
+                <img src="/images/weather/cloudy-icon.svg" alt="Weather Icon" />
+                <p className="temp">26° - 16°</p>
+              </div>
+              <div className="forecast-day" id="forecast-day">
+                <p className="day">thursday</p>
+                <img src="/images/weather/rainy-icon.svg" alt="Weather Icon" />
+                <p className="temp">26° - 16°</p>
+              </div>
+              <div className="forecast-day" id="forecast-day">
+                <p className="day">Friday</p>
+                <img src="/images/weather/rainy-icon.svg" alt="Weather Icon" />
+                <p className="temp">27° - 16°</p>
+              </div>
+              <div className="forecast-day" id="forecast-day">
+                <p className="day">Saturday</p>
+                <img src="/images/weather/foggy-icon.svg" alt="Weather Icon" />
+                <p className="temp">27° - 15°</p>
+              </div>
+              <div className="forecast-day" id="forecast-day">
+                <p className="day">Sunday</p>
+                <img src="/images/weather/rainy-icon.svg" alt="Weather Icon" />
+                <p className="temp">23° - 16°</p>
+              </div>
+              <div className="forecast-day" id="forecast-day">
+                <p className="day">Monday</p>
+                <img src="/images/weather/rainy-icon.svg" alt="Weather Icon" />
+                <p className="temp">20° - 14°</p>
+              </div>
+              <div className="forecast-day" id="forecast-day">
+                <p className="day">Tuesday</p>
+                <img src="/images/weather/rainy-icon.svg" alt="Weather Icon" />
+                <p className="temp">19° - 12°</p>
+              </div>
             </div>
           </div>
 
-          {/* Highlights grids */}
           <div className="highlights">
             <h3>Today's Highlights</h3>
             <div className="highlight-cards">
               <div className="card">
                 <h4>UV Index</h4>
                 <div className="uv-data">
-                  <span className="uv-value">{uvIndexToday}</span>
-                  <p>{uvIndexToday > 5 ? 'High' : uvIndexToday > 2 ? 'Moderate' : 'Low'}</p>
+                  <span className="uv-value">5</span>
+                  <p>Moderate</p>
                 </div>
               </div>
               <div className="card">
                 <h4>Wind Status</h4>
-                <span className="wind-value">{currentWindSpeed} km/h</span>
-                <p className="wind-dir">{currentWindDir}</p>
+                <span className="wind-value">7.70 km/h</span>
+                <p className="wind-dir">WSW</p>
               </div>
               <div className="card">
-                <h4>Sunrise & Sunset</h4>
-                <span className="value" style={{ fontSize: '20px' }}>{sunriseToday}</span><br />
-                <span className="value" style={{ fontSize: '20px' }}>{sunsetToday}</span>
+                <h4>Sunrise &amp; Sunset</h4>
+                <span className="value" style={{ fontSize: '25px' }}>6:35 AM</span><br />
+                <span className="value" style={{ fontSize: '25px' }}>5:42 PM</span>
               </div>
               <div className="card">
                 <h4>Humidity</h4>
-                <span className="value">{humidityToday}%</span>
-                <p>{humidityToday > 60 ? 'Humid' : humidityToday > 30 ? 'Normal' : 'Dry'}</p>
+                <span className="value" id="Humidityv">12%</span>
+                <p>Normal</p>
               </div>
               <div className="card">
                 <h4>Visibility</h4>
-                <span className="value">{visibilityToday} km</span>
-                <p>{parseFloat(visibilityToday) > 8 ? 'Clear' : 'Foggy'}</p>
+                <span className="value">5.2 km</span>
+                <p>Average</p>
               </div>
               <div className="card">
                 <h4>Air Quality</h4>
@@ -237,9 +245,8 @@ export default function Weather() {
               </div>
             </div>
           </div>
-
         </div>
       </div>
-    </div>
+    </>
   );
 }

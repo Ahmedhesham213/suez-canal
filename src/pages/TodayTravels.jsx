@@ -1,220 +1,143 @@
-import React, { useState, useEffect } from 'react';
-import '../styles/table.css';
+import React, { useState } from 'react';
+import { NavLink, Link } from 'react-router-dom';
 
-const DEFAULT_BOOKINGS = [
-  {
-    name: "Captain John Smith",
-    email: "john.smith@maersk.com",
-    image: "/images/gettyimages-1178343370-612x612.jpg",
-    booking_time: "2026-07-02T08:00"
-  },
-  {
-    name: "Officer Maria Rossi",
-    email: "m.rossi@evergreen-shipping.com",
-    image: "/images/gettyimages-1253824909-612x612.jpg",
-    booking_time: "2026-07-02T13:45"
-  }
-];
+/* Uses original css/header.css + css/table.css - exact same markup as table.html */
 
 export default function TodayTravels() {
-  const [bookings, setBookings] = useState(() => {
-    const saved = localStorage.getItem('suez_bookings');
-    return saved ? JSON.parse(saved) : DEFAULT_BOOKINGS;
-  });
-
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [time, setTime] = useState('');
-  const [imageFile, setImageFile] = useState(null);
+  const [data, setData] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
 
-  // Sync state changes with localStorage
-  useEffect(() => {
-    localStorage.setItem('suez_bookings', JSON.stringify(bookings));
-  }, [bookings]);
-
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setImageFile(e.target.files[0]);
-    }
-  };
-
-  const handleFormSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!name.trim() || !email.trim() || !time) {
-      alert('Please fill out Name, Email, and Booking Time fields.');
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const imageFile = document.getElementById('image').files[0];
+    const time = document.getElementById('time').value;
+
+    if (editIndex !== null && !imageFile) {
+      // editing without changing image - use existing
+      const updatedData = [...data];
+      updatedData[editIndex] = { ...updatedData[editIndex], name, email, booking_time: time };
+      setData(updatedData);
+      setEditIndex(null);
+      e.target.reset();
       return;
     }
 
-    const processSubmission = (imageUrl) => {
-      const updatedData = {
-        name: name.trim(),
-        email: email.trim(),
-        image: imageUrl,
-        booking_time: time
-      };
+    if (!name || !email || !imageFile || !time) {
+      alert('Please fill all the fields!');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function () {
+      const imageUrl = reader.result;
+      const newData = { name, email, image: imageUrl, booking_time: time };
 
       if (editIndex !== null) {
-        // Edit existing booking
-        const newBookings = [...bookings];
-        newBookings[editIndex] = updatedData;
-        setBookings(newBookings);
+        const updatedData = [...data];
+        updatedData[editIndex] = newData;
+        setData(updatedData);
         setEditIndex(null);
       } else {
-        // Add new booking
-        setBookings([...bookings, updatedData]);
+        setData([...data, newData]);
       }
-
-      // Reset form states
-      setName('');
-      setEmail('');
-      setTime('');
-      setImageFile(null);
-      // Reset the file input element manually
-      document.getElementById('image').value = '';
+      e.target.reset();
     };
-
-    if (imageFile) {
-      // Read selected image file as Base64 Data URL
-      const reader = new FileReader();
-      reader.onload = () => {
-        processSubmission(reader.result);
-      };
-      reader.readAsDataURL(imageFile);
-    } else {
-      if (editIndex !== null) {
-        // Retain existing image when editing without selecting a new file
-        processSubmission(bookings[editIndex].image);
-      } else {
-        alert('Please choose an image file for a new booking.');
-      }
-    }
+    reader.readAsDataURL(imageFile);
   };
 
-  const handleEditClick = (index) => {
-    const item = bookings[index];
-    setName(item.name);
-    setEmail(item.email);
-    setTime(item.booking_time);
+  const editItem = (index) => {
+    const item = data[index];
+    document.getElementById('name').value = item.name;
+    document.getElementById('email').value = item.email;
+    document.getElementById('time').value = item.booking_time;
     setEditIndex(index);
   };
 
-  const handleDeleteClick = (index) => {
-    if (window.confirm('Are you sure you want to delete this booking?')) {
-      const newBookings = bookings.filter((_, idx) => idx !== index);
-      setBookings(newBookings);
-      // If we are currently editing the deleted item, reset editing state
-      if (editIndex === index) {
-        setEditIndex(null);
-        setName('');
-        setEmail('');
-        setTime('');
-        setImageFile(null);
-        document.getElementById('image').value = '';
-      }
+  const deleteItem = (index) => {
+    if (confirm('Are you sure you want to delete this booking?')) {
+      setData(data.filter((_, i) => i !== index));
     }
   };
 
   return (
-    <div className="travels-page-container">
-      <div className="travels-card-container">
+    <>
+      <link rel="stylesheet" href="/css/header.css" />
+      <link rel="stylesheet" href="/css/table.css" />
+
+      {/* header */}
+      <header className="header">
+        <Link to="/" className="logo">
+          <img src="/images/keep it2.png" alt="logo" width="150" className="logo-image" />
+        </Link>
+
+        <nav className="navbar">
+          <NavLink to="/" end style={{ '--i': 1 }} className={({ isActive }) => isActive ? 'active' : ''}>Home</NavLink>
+          <NavLink to="/about" style={{ '--i': 2 }} className={({ isActive }) => isActive ? 'active' : ''}>About</NavLink>
+          <NavLink to="/travels" style={{ '--i': 3 }} className={({ isActive }) => isActive ? 'active' : ''}>Today Travels</NavLink>
+          <NavLink to="/weather" style={{ '--i': 4 }} className={({ isActive }) => isActive ? 'active' : ''}>Weather</NavLink>
+          <Link to="/login">
+            <button className="singn_in_btn">sign in</button>
+          </Link>
+        </nav>
+
+        <div className="soial-media">
+          <a href="https://twitter.com/SuezAuthorityEG" target="_blank" rel="noreferrer" style={{ '--i': 1 }}><i className="bx bxl-twitter"></i></a>
+          <a href="https://www.facebook.com/SuezCanalAuthorityEG/" target="_blank" rel="noreferrer" style={{ '--i': 2 }}><i className="bx bxl-facebook-circle"></i></a>
+          <a href="https://www.instagram.com/suezcanalauthority/" target="_blank" rel="noreferrer" style={{ '--i': 3 }}><i className="bx bxl-instagram-alt"></i></a>
+        </div>
+      </header>
+
+      {/* body content - same as table.html */}
+      <div className="container">
         <h1>Today's Booking</h1>
 
-        {/* Add/Edit Booking Form */}
-        <form id="crudForm" onSubmit={handleFormSubmit}>
-          <input
-            type="text"
-            id="name"
-            placeholder="Enter Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <input
-            type="email"
-            id="email"
-            placeholder="Enter Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="file"
-            id="image"
-            accept="image/*"
-            onChange={handleFileChange}
-            required={editIndex === null} // image is only strictly required on creation
-          />
-          <input
-            type="datetime-local"
-            id="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            required
-          />
-          <button type="submit">
-            {editIndex !== null ? 'Update Booking' : 'Save Booking'}
-          </button>
-          {editIndex !== null && (
-            <button 
-              type="button" 
-              onClick={() => {
-                setEditIndex(null);
-                setName('');
-                setEmail('');
-                setTime('');
-                setImageFile(null);
-                document.getElementById('image').value = '';
-              }}
-              style={{ backgroundColor: '#aaa', marginTop: '-5px' }}
-            >
-              Cancel Edit
-            </button>
-          )}
+        <form id="crudForm" encType="multipart/form-data" onSubmit={handleSubmit}>
+          <input type="text" id="name" name="name" placeholder="Enter Name" required />
+          <input type="email" id="email" name="email" placeholder="Enter Email" required />
+          <input type="file" id="image" name="image" accept="image/*" />
+          <input type="datetime-local" id="time" name="booking_time" required />
+          <button type="submit">Save</button>
         </form>
 
-        {/* Booking display table */}
-        <div className="table-responsive">
-          <table id="dataTable">
-            <thead>
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th>Num</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Image</th>
+              <th>Booking Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.length === 0 ? (
               <tr>
-                <th>Num</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Image</th>
-                <th>Booking Time</th>
-                <th>Actions</th>
+                <td colSpan="6" style={{ fontSize: '1rem', textAlign: 'center' }}>
+                  <b>there is no resevison at the moment</b>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {bookings.length === 0 ? (
-                <tr>
-                  <td colSpan={6} style={{ fontSize: '1rem', textAlign: 'center', fontWeight: 'bold' }}>
-                    There are no bookings at the moment.
+            ) : (
+              data.map((item, index) => (
+                <tr key={index}>
+                  <td>{index + 1}</td>
+                  <td>{item.name}</td>
+                  <td>{item.email}</td>
+                  <td><img className="user-image" src={item.image} alt="User" /></td>
+                  <td>{item.booking_time}</td>
+                  <td className="action-buttons">
+                    <button className="edit" onClick={() => editItem(index)}>Edit</button>
+                    <button className="delete" onClick={() => deleteItem(index)}>Delete</button>
                   </td>
                 </tr>
-              ) : (
-                bookings.map((item, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>{item.name}</td>
-                    <td>{item.email}</td>
-                    <td>
-                      <img className="user-image" src={item.image} alt={item.name} />
-                    </td>
-                    <td>{new Date(item.booking_time).toLocaleString()}</td>
-                    <td className="action-buttons">
-                      <button className="edit" onClick={() => handleEditClick(index)}>Edit</button>
-                      <button className="delete" onClick={() => handleDeleteClick(index)}>Delete</button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
-    </div>
+    </>
   );
 }
