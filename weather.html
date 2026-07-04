@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather | Suez Canal</title>
+    <link rel="stylesheet" href="css/weather.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link href='css/boxicons/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+
+              <!--                           header                           -->
+              <header class="header">
+                <a href="index.html" class="logo">
+                <img src="images/keep it2.png"  alt="logo" width="150"  class="logo-image"> 
+                </a>
+            
+                <nav class="navbar">
+                    <a href="index.html" style="--i:1;">Home</a>
+                    <a href="about.html" style="--i:2;" >About</a>
+                    <a href="table.html" style="--i:3;">Today Travels</a>
+                    <a href="weather.html" style="--i:4;"  class="active">Weather</a>
+                    <a href="login.html">
+                    <button class="singn_in_btn">sign in</button>
+                  </a>
+            
+            
+                </nav>
+            
+                <div class="soial-media">
+                    <a href="https://twitter.com/SuezAuthorityEG?ref_src=twsrc%5Egoogle%7Ctwcamp%5Eserp%7Ctwgr%5Eauthor" style="--i:1;"><i class='bx bxl-twitter'></i></a>
+                    <a href="https://www.facebook.com/SuezCanalAuthorityEG/" style="--i:2;"><i class='bx bxl-facebook-circle' ></i></a>
+                    <a href="https://www.instagram.com/suezcanalauthority/" style="--i:3;"><i class='bx bxl-instagram-alt' ></i></a>
+                </div>
+                
+               </header>
+                       <!--                           header                           -->
+
+    <div class="weather-dashboard">
+
+        <div class="sidebar">
+            <div class="current-weather">
+                <div class="weather-icon">
+                    <img src="images/weather/sunny-icon.png" alt="Current Weather">
+                </div>
+                <h2 id="current-temp">12°C</h2>
+                <p class="current-day">Monday, 16:00</p>
+                <p class="weather-desc">Mostly Cloudy</p>
+                <p class="rain-chance">Rain - 30%</p>
+                <div class="location">
+                    <img src="images/weather/background.jpg" alt="Location">
+                    <p>Suez Canal, Suez, Egypt</p>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="main-content">
+            <div class="forecast">
+                <div class="tabs">
+                    <button class="tab" id="today-tab">Today</button>
+                    <button class="tab active" id="week-tab">Week</button>
+                </div>
+                <div class="forecast-days" id="forecast-container">
+                        <div class="forecast-day" id="forecast-day">
+                            <p class="day">Wednesday</p>
+                            <img src="images/weather/cloudy-icon.svg" alt="Weather Icon">
+                            <p class="temp">26° - 16°</p>
+                        </div>
+                    
+                        <div class="forecast-day" id="forecast-day">
+                            <p class="day">thursday</p>
+                            <img src="images/weather/rainy-icon.svg" alt="Weather Icon">
+                            <p class="temp">26° - 16°</p>
+                        </div>
+                    
+                        <div class="forecast-day" id="forecast-day">
+                            <p class="day">Friday</p>
+                            <img src="images/weather/rainy-icon.svg" alt="Weather Icon">
+                            <p class="temp">27° - 16°</p>
+                        </div>
+                    
+                        <div class="forecast-day" id="forecast-day">
+                            <p class="day">Saturday</p>
+                            <img src="images/weather/foggy-icon.svg" alt="Weather Icon">
+                            <p class="temp">27° - 15°</p>
+                        </div>
+                    
+                        <div class="forecast-day" id="forecast-day">
+                            <p class="day">Sunday</p>
+                            <img src="images/weather/rainy-icon.svg" alt="Weather Icon">
+                            <p class="temp">23° - 16°</p>
+                        </div>
+                    
+                        <div class="forecast-day" id="forecast-day">
+                            <p class="day">Monday</p>
+                            <img src="images/weather/rainy-icon.svg" alt="Weather Icon">
+                            <p class="temp">20° - 14°</p>
+                        </div>
+                    
+                        <div class="forecast-day" id="forecast-day">
+                            <p class="day">Tuesday</p>
+                            <img src="images/weather/rainy-icon.svg" alt="Weather Icon">
+                            <p class="temp">19° - 12°</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="highlights">
+                <h3>Today's Highlights</h3>
+                <div class="highlight-cards">
+                    <div class="card">
+                        <h4>UV Index</h4>
+                        <div class="uv-data">
+                            <span class="uv-value">5</span>
+                            <p>Moderate</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>Wind Status</h4>
+                        <span class="wind-value">7.70 km/h</span>
+                        <p class="wind-dir">WSW</p>
+                    </div>
+                    <div class="card">
+                        <h4>Sunrise & Sunset</h4>
+                        <span class="value" style="font-size: 25px;">6:35 AM</span><br>
+                        <span class="value" style="font-size: 25px;">5:42 PM</span>
+                    </div>
+                    <div class="card">
+                        <h4>Humidity</h4>
+                        <span class="value" id="Humidityv">12%</span>
+                        <p>Normal</p>
+                    </div>
+                    <div class="card">
+                        <h4>Visibility</h4>
+                        <span class="value">5.2 km</span>
+                        <p>Average</p>
+                    </div>
+                    <div class="card">
+                        <h4>Air Quality</h4>
+                        <span class="value">105</span>
+                        <p>Unhealthy</p>
+                    </div>
+                </div>
+            </div>
+
+            
+        </div>
+    </div>
+    <script src="js/weather.js"></script>
+</body>
+</html>

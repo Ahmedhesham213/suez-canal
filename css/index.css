@@ -85,7 +85,7 @@ body{
     text-decoration: none;
     transform: rotate(45deg);
     transition: .5s;
-    opacity: 1;
+    opacity: 0;
     animation: slideSci .5s ease forwards;
     animation-delay :calc(.2s * var(--i)) ;
 }
