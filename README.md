@@ -9,7 +9,7 @@ Throughout this project, I focused on creating **dynamic, interactive sections**
 ---
 Check out the live version of the project here 👇
  ## 🚀 Live Demo
-🔗 [View Website](https://suez-canal.netlify.app/)
+🔗 [View Website](https://suez-canal.vercel.app/)
 ---
 
 ## ✨ Features
